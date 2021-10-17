@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
+import 'fooderlich_theme.dart';
+import 'home.dart';
 
 void main() {
-  // 1
+  // runApp takes the main widget, which is Fooderlich
   runApp(const Fooderlich());
 }
 
 class Fooderlich extends StatelessWidget {
-  // 2
   const Fooderlich({Key? key}) : super(key: key);
+
+  // Every stateless widget must override the `build` method
   @override
   Widget build(BuildContext context) {
-    // TODO: Create theme
-    // TODO: Apply Home widget
-    // 3
+    final theme = FooderlichTheme.dark();
+    // Composes MaterialApp widget for Material look and feel
     return MaterialApp(
-      // TODO: Add theme
-      title: 'Fooderlich',
-      // 4
-      home: Scaffold(
-        // TODO: Style the title
-        appBar: AppBar(title: const Text('Fooderlich')),
-        // TODO: Style the body text
-        body: const Center(child: Text('Let\'s get cooking 👩‍🍳')),
-      ),
-    );
+        theme: theme,
+        title: 'Fooderlich',
+        // Scaffold defines layout and structure of the app
+        home: const Home());
   }
 }

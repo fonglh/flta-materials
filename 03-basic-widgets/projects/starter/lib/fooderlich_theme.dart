@@ -58,6 +58,7 @@ class FooderlichTheme {
     ),
   );
 
+// Colour tones for a light theme using lightTextTheme
   static ThemeData light() {
     return ThemeData(
       brightness: Brightness.light,
@@ -83,6 +84,7 @@ class FooderlichTheme {
     );
   }
 
+  // Colour tones for a dark theme using darkTextTheme
   static ThemeData dark() {
     return ThemeData(
       brightness: Brightness.dark,
