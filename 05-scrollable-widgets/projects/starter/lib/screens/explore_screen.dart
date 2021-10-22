@@ -19,7 +19,6 @@ class ExploreScreen extends StatelessWidget {
       future: mockService.getExploreData(),
       // within builder, use snapshot to check the state of the Future
       builder: (context, AsyncSnapshot<ExploreData> snapshot) {
-        // TODO: Add Nested List Views
         // Future is complete, can extract the data.
         if (snapshot.connectionState == ConnectionState.done) {
           // snapshot.data returns ExploreData, can extract todayRecipes to pass
@@ -31,11 +30,7 @@ class ExploreScreen extends StatelessWidget {
             children: [
               TodayRecipeListView(recipes: recipes),
               const SizedBox(height: 16),
-              // TODO: Replace this with FriendPostListView
-              Container(
-                height: 400,
-                color: Colors.green,
-              ),
+              FriendPostListView(friendPosts: snapshot.data?.friendPosts ?? []),
             ],
           );
         } else {
