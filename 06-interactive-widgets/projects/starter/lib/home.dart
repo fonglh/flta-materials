@@ -33,7 +33,6 @@ class _HomeState extends State<Home> {
           ),
         ),
         // Displays the correct page widget based on the current tab index
-        // TODO: Replace body
         body: pages[tabManager.selectedTab],
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor:
