@@ -4,6 +4,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../models/models.dart';
+import '../components/grocery_tile.dart';
 
 class GroceryItemScreen extends StatefulWidget {
   // callback to know when new item is created
@@ -100,10 +101,27 @@ class _GroceryItemScreenState extends State<GroceryItemScreen> {
             buildNameField(),
             buildImportanceField(),
             buildDateField(context),
-            // TODO 16: Add time picker
-            // TODO 17: Add color picker
-            // TODO 18: Add slider
-            // TODO: 19: Add Grocery Tile
+            buildTimeField(context),
+            const SizedBox(height: 10.0),
+            buildColorPicker(context),
+            const SizedBox(height: 10.0),
+            buildQuantityField(),
+            GroceryTile(
+              item: GroceryItem(
+                id: 'previewMode',
+                name: _name,
+                importance: _importance,
+                color: _currentColor,
+                quantity: _currentSliderValue,
+                date: DateTime(
+                  _dueDate.year,
+                  _dueDate.month,
+                  _dueDate.day,
+                  _timeOfDay.hour,
+                  _timeOfDay.minute,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -243,10 +261,134 @@ class _GroceryItemScreenState extends State<GroceryItemScreen> {
     );
   }
 
-  // TODO: Add buildTimeField()
+  Widget buildTimeField(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Time of Day',
+              style: GoogleFonts.lato(fontSize: 28.0),
+            ),
+            TextButton(
+              child: const Text('Select'),
+              onPressed: () async {
+                // Show time picker when Select text is pressed
+                final timeOfDay = await showTimePicker(
+                  initialTime: TimeOfDay.now(),
+                  context: context,
+                );
 
-  // TODO: Add buildColorPicker()
+                // After user selects the time, update the state.
+                setState(() {
+                  if (timeOfDay != null) {
+                    _timeOfDay = timeOfDay;
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+        Text('${_timeOfDay.format(context)}'),
+      ],
+    );
+  }
 
-  // TODO: Add buildQuantityField()
+  Widget buildColorPicker(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Row child contains a container with the current colour, a sized box
+        // for spacing and text for the colour picker's title.
+        Row(
+          children: [
+            Container(
+              height: 50.0,
+              width: 10.0,
+              color: _currentColor,
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              'Color',
+              style: GoogleFonts.lato(fontSize: 28.0),
+            ),
+          ],
+        ),
+        TextButton(
+          child: const Text('Select'),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                // Wraps BlockPicker inside AlertDialog
+                return AlertDialog(
+                  content: BlockPicker(
+                    pickerColor: Colors.white,
+                    // Updates the state when user selects a colour
+                    onColorChanged: (color) {
+                      setState(() => _currentColor = color);
+                    },
+                  ),
+                  actions: [
+                    // Adds an action button in the alert dialog
+                    // When user taps save, it dismisses the dialog
+                    TextButton(
+                      child: const Text('Save'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
 
+  Widget buildQuantityField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Add a title and quantity label in a row, with space between
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              'Quantity',
+              style: GoogleFonts.lato(fontSize: 28.0),
+            ),
+            const SizedBox(width: 16.0),
+            Text(
+              _currentSliderValue.toInt().toString(),
+              style: GoogleFonts.lato(fontSize: 18.0),
+            ),
+          ],
+        ),
+        Slider(
+          inactiveColor: _currentColor.withOpacity(0.5),
+          activeColor: _currentColor,
+          value: _currentSliderValue.toDouble(),
+          // Slider's min and max values
+          min: 0.0,
+          max: 100.0,
+          divisions: 100,
+          // Label shown when sliding
+          label: _currentSliderValue.toInt().toString(),
+          onChanged: (double value) {
+            setState(
+              () {
+                _currentSliderValue = value.toInt();
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
 }
