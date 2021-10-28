@@ -32,8 +32,9 @@ class _HomeState extends State<Home> {
             style: Theme.of(context).textTheme.headline6,
           ),
         ),
-        // Displays the correct page widget based on the current tab index
-        body: pages[tabManager.selectedTab],
+        // Easily switch widgets. Shows one child at a time, but preserves
+        // the state of all the children.
+        body: IndexedStack(index: tabManager.selectedTab, children: pages),
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor:
               Theme.of(context).textSelectionTheme.selectionColor,
