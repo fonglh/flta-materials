@@ -22,7 +22,7 @@ class Fooderlich extends StatefulWidget {
 class _FooderlichState extends State<Fooderlich> {
   final _groceryManager = GroceryManager();
   final _profileManager = ProfileManager();
-  // TODO: Create AppStateManager
+  final _appStateManager = AppStateManager();
   // TODO: Define AppRouter
 
   // TODO: Initialize app router
@@ -37,7 +37,11 @@ class _FooderlichState extends State<Fooderlich> {
         ChangeNotifierProvider(
           create: (context) => _profileManager,
         ),
-        // TODO: Add AppStateManager ChangeNotifierProvider
+        // Creates a change provider for the app state manager so widget
+        // descendants can access or listen to the app state.
+        ChangeNotifierProvider(
+          create: (context) => _appStateManager,
+        ),
       ],
       child: Consumer<ProfileManager>(
         builder: (context, profileManager, child) {
