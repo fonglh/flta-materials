@@ -52,7 +52,7 @@ class AppRouter extends RouterDelegate
           _handlePopPage, // called every time a page is popped from the stack
       // Stack of pages that defines the navigation stack.
       pages: [
-        // TODO: Add SplashScreen
+        if (!appStateManager.isInitialized) SplashScreen.page(),
         // TODO: Add LoginScreen
         // TODO: Add OnboardingScreen
         // TODO: Add Home
