@@ -53,8 +53,10 @@ class AppRouter extends RouterDelegate
       // Stack of pages that defines the navigation stack.
       pages: [
         if (!appStateManager.isInitialized) SplashScreen.page(),
-        // TODO: Add LoginScreen
-        // TODO: Add OnboardingScreen
+        if (appStateManager.isInitialized && !appStateManager.isLoggedIn)
+          LoginScreen.page(),
+        if (appStateManager.isLoggedIn && !appStateManager.isOnboardingComplete)
+          OnboardingScreen.page(),
         // TODO: Add Home
         // TODO: Create new item
         // TODO: Select GroceryItemScreen
