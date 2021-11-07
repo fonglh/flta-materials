@@ -89,8 +89,11 @@ class AppRouter extends RouterDelegate
         // Checks the profileManager to see if the user selected their profile.
         // If so, show the profile screen.
         if (profileManager.didSelectUser)
-          ProfileScreen.page(profileManager.getUser)
-        // TODO: Add WebView Screen
+          ProfileScreen.page(profileManager.getUser),
+
+        // Presents the WebView screen if user has tapped the option to visit
+        // the Ray Wenderlich website.
+        if (profileManager.didTapOnRaywenderlich) WebViewScreen.page(),
       ],
     );
   }
@@ -128,8 +131,12 @@ class AppRouter extends RouterDelegate
       profileManager.tapOnProfile(false);
     }
 
-    // TODO: Handle state when user closes WebView screen
-    // 6
+    if (route.settings.name == FooderlichPages.raywenderlich) {
+      profileManager.tapOnRaywenderlich(false);
+    }
+
+    // 6: this looks like an omission with the code in the "Handling pop events"
+    // section. Marker is here but there's no explanation.
     return true;
   }
 
