@@ -64,7 +64,9 @@ class _FooderlichState extends State<Fooderlich> {
             title: 'Fooderlich',
             home: Router(
               routerDelegate: _appRouter,
-              // TODO: Add backButtonDispatcher
+              // listens to the platform's pop route notifications, triggers
+              // the router delgate's onPopPage callback.
+              backButtonDispatcher: RootBackButtonDispatcher(),
             ),
           );
         },
