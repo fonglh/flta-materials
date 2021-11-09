@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 import '../screens/screens.dart';
+import 'app_link.dart';
 
-class AppRouter extends RouterDelegate //TODO: Add <AppLink>
-    with
-        ChangeNotifier,
-        PopNavigatorRouterDelegateMixin {
+class AppRouter extends RouterDelegate<AppLink>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin {
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
@@ -98,7 +97,38 @@ class AppRouter extends RouterDelegate //TODO: Add <AppLink>
 
   // TODO: Apply configuration helper
 
-  // TODO: Replace setNewRoutePath
+  // Called when new route is pushed. Passes along an AppLink.
+  // This is the nav configuration.
   @override
-  Future<void> setNewRoutePath(configuration) async => null;
+  Future<void> setNewRoutePath(AppLink newLink) async {
+    // Use switch to check every location
+    switch (newLink.location) {
+      // Show profile screen if location is /profile
+      case AppLink.kProfilePath:
+        profileManager.tapOnProfile(true);
+        break;
+      case AppLink.kItemPath:
+        // Null check, and show item if not null
+        final itemId = newLink.itemId;
+        if (itemId != null) {
+          groceryManager.setSelectedGroceryItem(itemId);
+        } else {
+          // Empty grocery screen if no item selected.
+          groceryManager.createNewItem();
+        }
+        // Hide profile screen
+        profileManager.tapOnProfile(false);
+        break;
+      case AppLink.kHomePath:
+        // Set currently selected tab.
+        appStateManager.goToTab(newLink.currentTab ?? 0);
+        // Make sure profile and grocery item screens are hidden.
+        profileManager.tapOnProfile(false);
+        groceryManager.groceryItemTapped(-1);
+        break;
+      // Do nothing if location does not exist.
+      default:
+        break;
+    }
+  }
 }
