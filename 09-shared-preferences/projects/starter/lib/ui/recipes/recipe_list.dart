@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-// TODO: Add imports
+import 'package:shared_preferences/shared_preferences.dart';
+import '../widgets/custom_dropdown.dart';
+import '../colors.dart';
 
 class RecipeList extends StatefulWidget {
   const RecipeList({Key? key}) : super(key: key);
@@ -11,7 +13,8 @@ class RecipeList extends StatefulWidget {
 }
 
 class _RecipeListState extends State<RecipeList> {
-  // TODO: Add key
+  static const String prefSearchKey = 'previousSearches';
+
   late TextEditingController searchTextController;
   final ScrollController _scrollController = ScrollController();
   List currentSearchList = [];
@@ -22,12 +25,12 @@ class _RecipeListState extends State<RecipeList> {
   bool hasMore = false;
   bool loading = false;
   bool inErrorState = false;
-  // TODO: Add searches array
+  List<String> previousSearches = <String>[];
 
   @override
   void initState() {
     super.initState();
-    // TODO: Call getPreviousSearches
+    getPreviousSearches();
     searchTextController = TextEditingController(text: '');
     _scrollController
       ..addListener(() {
@@ -56,7 +59,27 @@ class _RecipeListState extends State<RecipeList> {
     super.dispose();
   }
 
-  // TODO: Add savePreviousSearches
+  void savePreviousSearches() async {
+    // Uses await to wait for an instance of SharedPreferences.
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(prefSearchKey, previousSearches);
+  }
+
+  void getPreviousSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Check if a preference for the saved list already exists.
+    if (prefs.containsKey(prefSearchKey)) {
+      final searches = prefs.getStringList(prefSearchKey);
+
+      // Check that the saved list is not null, init an empty list if it's null
+      if (searches != null) {
+        previousSearches = searches;
+      } else {
+        previousSearches = <String>[];
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,45 +107,102 @@ class _RecipeListState extends State<RecipeList> {
         child: Row(
           children: [
             // Replace
-            const Icon(Icons.search),
+            IconButton(
+              icon: const Icon(Icons.search),
+              // Handle the tap event.
+              onPressed: () {
+                // Use the current search text to start a search
+                startSearch(searchTextController.text);
+                // Hide the keyboard by using the FocusScope class
+                final currentFocus = FocusScope.of(context);
+                if (!currentFocus.hasPrimaryFocus) {
+                  currentFocus.unfocus();
+                }
+              },
+            ),
             const SizedBox(
               width: 6.0,
             ),
-            // *** Start Replace
             Expanded(
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                          border: InputBorder.none, hintText: 'Search'),
-                      autofocus: false,
-                      controller: searchTextController,
-                      onChanged: (query) => {
-                        if (query.length >= 3) {
-                            // Rebuild list
-                            setState(() {
-                                currentSearchList.clear();
-                                currentCount = 0;
-                                currentEndPosition = pageCount;
-                                currentStartPosition = 0;
-                              },
-                            )
-                          }
-                      },
+                      // TextField for the search queries
+                      child: TextField(
+                    decoration: const InputDecoration(
+                        border: InputBorder.none, hintText: 'Search'),
+                    autofocus: false,
+                    // Closes the keyboard when the user presses the Done button
+                    textInputAction: TextInputAction.done,
+                    // Save the search when the user has finished entering text
+                    onSubmitted: (value) {
+                      if (!previousSearches.contains(value)) {
+                        previousSearches.add(value);
+                        savePreviousSearches();
+                      }
+                    },
+                    controller: searchTextController,
+                  )),
+                  // PopupMenuButton to show previous searches
+                  PopupMenuButton<String>(
+                    icon: const Icon(
+                      Icons.arrow_drop_down,
+                      color: lightGrey,
                     ),
+                    // Start a new search when the user selects an item from
+                    // a previous search.
+                    onSelected: (String value) {
+                      searchTextController.text = value;
+                      startSearch(searchTextController.text);
+                    },
+                    itemBuilder: (BuildContext context) {
+                      // Build list of CustomDropdownMenuItems to display
+                      // previous searches.
+                      return previousSearches
+                          .map<CustomDropdownMenuItem<String>>((String value) {
+                        return CustomDropdownMenuItem<String>(
+                          text: value,
+                          value: value,
+                          callback: () {
+                            setState(() {
+                              // if X icon is pressed, remove the search from
+                              // the previous searches and close the pop-up menu
+                              previousSearches.remove(value);
+                              Navigator.pop(context);
+                            });
+                          },
+                        );
+                      }).toList();
+                    },
                   ),
                 ],
               ),
             ),
-            // *** End Replace
           ],
         ),
       ),
     );
   }
 
-  // TODO: Add startSearch
+  void startSearch(String value) {
+    // Tells system to redraw widgets by calling setState.
+    setState(() {
+      // Clear current search list and reset counters.
+      currentSearchList.clear();
+      currentCount = 0;
+      currentEndPosition = pageCount;
+      currentStartPosition = 0;
+      hasMore = true;
+      value = value.trim();
+
+      // Check that search text isn't already in the list of previous searches
+      if (!previousSearches.contains(value)) {
+        // Add to, and save the list
+        previousSearches.add(value);
+        savePreviousSearches();
+      }
+    });
+  }
 
   Widget _buildRecipeLoader(BuildContext context) {
     if (searchTextController.text.length < 3) {
