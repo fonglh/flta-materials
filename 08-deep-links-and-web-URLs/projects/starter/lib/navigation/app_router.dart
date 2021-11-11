@@ -93,9 +93,28 @@ class AppRouter extends RouterDelegate<AppLink>
     return true;
   }
 
-  // TODO: Convert app state to applink
+  // Go through possible app states and return AppLink object for each one.
+  AppLink getCurrentPath() {
+    if (!appStateManager.isLoggedIn) {
+      return AppLink(location: AppLink.kLoginPath);
+    } else if (!appStateManager.isOnboardingComplete) {
+      return AppLink(location: AppLink.kOnboardingPath);
+    } else if (profileManager.didSelectUser) {
+      return AppLink(location: AppLink.kProfilePath);
+    } else if (groceryManager.isCreatingNewItem) {
+      return AppLink(location: AppLink.kItemPath);
+    } else if (groceryManager.selectedGroceryItem != null) {
+      final id = groceryManager.selectedGroceryItem?.id;
+      return AppLink(location: AppLink.kItemPath, itemId: id);
+    } else {
+      return AppLink(
+          location: AppLink.kHomePath,
+          currentTab: appStateManager.getSelectedTab);
+    }
+  }
 
-  // TODO: Apply configuration helper
+  @override
+  AppLink get currentConfiguration => getCurrentPath();
 
   // Called when new route is pushed. Passes along an AppLink.
   // This is the nav configuration.
