@@ -11,7 +11,7 @@ class Ingredient extends Equatable {
   Ingredient({this.id, this.recipeId, this.name, this.weight});
 
   // Equatable uses the props value to know what fields to compare when doing
-  // equality checks
+  // equality checks.
   @override
   List<Object?> get props => [recipeId, name, weight];
 }
