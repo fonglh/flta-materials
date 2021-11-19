@@ -1,28 +1,32 @@
-
 import 'models/models.dart';
 
 abstract class Repository {
-  List<Recipe> findAllRecipes();
+  Future<List<Recipe>> findAllRecipes();
+  // Watches for any changes to the list of recipes. If user does a new search,
+  // updates the list of recipes and notifies listeners accordingly.
+  Stream<List<Recipe>> watchAllRecipes();
+  // listens for changes in the list of ingredients shown on the groceries
+  // screen
+  Stream<List<Ingredient>> watchAllIngredients();
 
-  Recipe findRecipeById(int id);
+  Future<Recipe> findRecipeById(int id);
 
-  List<Ingredient> findAllIngredients();
+  Future<List<Ingredient>> findAllIngredients();
 
-  List<Ingredient> findRecipeIngredients(int recipeId);
+  Future<List<Ingredient>> findRecipeIngredients(int recipeId);
 
-  int insertRecipe(Recipe recipe);
+  Future<int> insertRecipe(Recipe recipe);
 
-  List<int> insertIngredients(List<Ingredient> ingredients);
+  Future<List<int>> insertIngredients(List<Ingredient> ingredients);
 
-  void deleteRecipe(Recipe recipe);
+  Future<void> deleteRecipe(Recipe recipe);
 
-  void deleteIngredient(Ingredient ingredient);
+  Future<void> deleteIngredient(Ingredient ingredient);
 
-  void deleteIngredients(List<Ingredient> ingredients);
+  Future<void> deleteIngredients(List<Ingredient> ingredients);
 
-  void deleteRecipeIngredients(int recipeId);
+  Future<void> deleteRecipeIngredients(int recipeId);
 
   Future init();
   void close();
-
 }
