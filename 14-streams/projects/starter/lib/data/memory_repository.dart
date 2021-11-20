@@ -80,18 +80,18 @@ class MemoryRepository extends Repository {
   Future<List<int>> insertIngredients(List<Ingredient> ingredients) {
     if (ingredients.length != 0) {
       _currentIngredients.addAll(ingredients);
+      _ingredientStreamController.sink.add(_currentIngredients);
     }
-    _ingredientStreamController.sink.add(_currentIngredients);
     return Future.value(<int>[]);
   }
 
   @override
   Future<void> deleteRecipe(Recipe recipe) {
     _currentRecipes.remove(recipe);
+    _recipeStreamController.sink.add(_currentRecipes);
     if (recipe.id != null) {
       deleteRecipeIngredients(recipe.id!);
     }
-    _recipeStreamController.sink.add(_currentRecipes);
     return Future.value();
   }
 
