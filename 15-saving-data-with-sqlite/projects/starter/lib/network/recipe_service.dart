@@ -6,8 +6,8 @@ import 'service_interface.dart';
 
 part 'recipe_service.chopper.dart';
 
-const String apiKey = '<Your Key Here>';
-const String apiId = '<Your Id here>';
+const String apiKey = '9652d92ec5c32bb4948d8022e57c638b';
+const String apiId = '47c02314';
 const String apiUrl = 'https://api.edamam.com';
 
 @ChopperApi()
