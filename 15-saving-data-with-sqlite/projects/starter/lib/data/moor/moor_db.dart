@@ -44,13 +44,111 @@ class RecipeDatabase extends _$RecipeDatabase {
   int get schemaVersion => 1;
 }
 
+// Specifies the following class is a DAO class for the MoorRecipe table
+@UseDao(tables: [MoorRecipe])
+class RecipeDao extends DatabaseAccessor<RecipeDatabase> with _$RecipeDaoMixin {
+  final RecipeDatabase db;
 
-// TODO: Add RecipeDao here
+  RecipeDao(this.db) : super(db);
 
-// TODO: Add IngredientDao
+  Future<List<MoorRecipeData>> findAllRecipes() => select(moorRecipe).get();
 
-// TODO: Add moorRecipeToRecipe here
+  Stream<List<Recipe>> watchAllRecipes() {
+    // `select` starts a query
+    return select(moorRecipe)
+        // Create a stream
+        .watch()
+        .map(
+      (rows) {
+        final recipes = <Recipe>[];
+        rows.forEach(
+          (row) {
+            // Convert recipe row to a normal recipe
+            final recipe = moorRecipeToRecipe(row);
+            if (!recipes.contains(recipe)) {
+              recipe.ingredients = <Ingredient>[];
+              recipes.add(recipe);
+            }
+          },
+        );
+        return recipes;
+      },
+    );
+  }
 
-// TODO: Add MoorRecipeData here
+  Future<List<MoorRecipeData>> findRecipeById(int id) =>
+      (select(moorRecipe)..where((tbl) => tbl.id.equals(id))).get();
 
-// TODO: Add moorIngredientToIngredient and MoorIngredientCompanion here
+  // Use `into` and `insert` to add a new recipe
+  // Pass the `Insertable` interface, which is implemented in the generated part
+  // file.
+  Future<int> insertRecipe(Insertable<MoorRecipeData> recipe) =>
+      into(moorRecipe).insert(recipe);
+
+  // Use `delete` and `where` to delete a specific recipe
+  Future deleteRecipe(int id) => Future.value(
+      (delete(moorRecipe)..where((tbl) => tbl.id.equals(id))).go());
+}
+
+@UseDao(tables: [MoorIngredient])
+class IngredientDao extends DatabaseAccessor<RecipeDatabase>
+    with _$IngredientDaoMixin {
+  final RecipeDatabase db;
+
+  IngredientDao(this.db) : super(db);
+
+  Future<List<MoorIngredientData>> findAllIngredients() =>
+      select(moorIngredient).get();
+
+  // Call `watch` to create a stream.
+  Stream<List<MoorIngredientData>> watchAllIngredients() =>
+      select(moorIngredient).watch();
+
+  Future<List<MoorIngredientData>> findRecipeIngredients(int id) =>
+      (select(moorIngredient)..where((tbl) => tbl.recipeId.equals(id))).get();
+
+  Future<int> insertIngredient(Insertable<MoorIngredientData> ingredient) =>
+      into(moorIngredient).insert(ingredient);
+
+  Future deleteIngredient(int id) => Future.value(
+      (delete(moorIngredient)..where((tbl) => tbl.id.equals(id))).go());
+}
+
+// Conversion Methods
+Recipe moorRecipeToRecipe(MoorRecipeData recipe) {
+  return Recipe(
+      id: recipe.id,
+      label: recipe.label,
+      image: recipe.image,
+      url: recipe.url,
+      calories: recipe.calories,
+      totalWeight: recipe.totalWeight,
+      totalTime: recipe.totalTime);
+}
+
+Insertable<MoorRecipeData> recipeToInsertableMoorRecipe(Recipe recipe) {
+  // Use this generated `MoorRecipeCompanion` class to create the insertable.
+  return MoorRecipeCompanion.insert(
+      label: recipe.label ?? '',
+      image: recipe.image ?? '',
+      url: recipe.url ?? '',
+      calories: recipe.calories ?? 0,
+      totalWeight: recipe.totalWeight ?? 0,
+      totalTime: recipe.totalTime ?? 0);
+}
+
+Ingredient moorIngredientToIngredient(MoorIngredientData ingredient) {
+  return Ingredient(
+      id: ingredient.id,
+      recipeId: ingredient.recipeId,
+      name: ingredient.name,
+      weight: ingredient.weight);
+}
+
+MoorIngredientCompanion ingredientToInsertableMoorIngredient(
+    Ingredient ingredient) {
+  return MoorIngredientCompanion.insert(
+      recipeId: ingredient.recipeId ?? 0,
+      name: ingredient.name ?? '',
+      weight: ingredient.weight ?? 0);
+}
